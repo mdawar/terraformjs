@@ -81,7 +81,7 @@ export class Block {
           return target[property];
         }
 
-        return target.getExpression(property);
+        return target.getExpression(property.toString());
       }
     });
   }
