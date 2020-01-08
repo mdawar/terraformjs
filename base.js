@@ -150,3 +150,88 @@ export class Block {
     return this.toString();
   }
 }
+
+/**
+ * Class representing a Block instance builder.
+ *
+ * These instances handle chaining properties to set the block labels
+ * and support setting the block body by calling the last chained label.
+ *
+ * This class is implemented using hacks to support chaining and calling, but it works
+ * as the eventual goal is to generate JSON files from the Block instances.
+ *
+ * @see {@link https://stackoverflow.com/a/40878674/1209328|Extend Function}
+ */
+export class BlockBuilder extends Function {
+  /**
+   * Creates a BlockBuilder instance.
+   *
+   * @param {string} type - The type of the block to create
+   * @param {string} label - The first block label
+   * @returns {Proxy} Proxy object that handles dynamic property access
+   */
+  constructor(type, label) {
+    // Support calling the instance
+    super('...args', 'return this.__self__.__call__(...args)');
+
+    const self = this.bind(this);
+    this.__self__ = self;
+
+    self._type = type;
+    self._labels = [label];
+
+    return new Proxy(self, {
+      // Handle chaining labels
+      get(target, property) {
+        // Add the chained label to the labels list
+        target._labels.push(property.toString());
+
+        // Return a proxy to the same object with the new labels
+        // and the same handlers (this refers to the handler object)
+        return new Proxy(target, this);
+      }
+    });
+  }
+
+  /**
+   * Handles calling the instances of this class to create a Block instance.
+   *
+   * @param {object} body - Object of the configuration arguments of the block
+   * @returns {Block} Block object
+   */
+  __call__(body = {}) {
+    return new Block(this._type, this._labels, body);
+  }
+}
+
+/**
+ * Class representing a Terraform top-level block.
+ *
+ * These blocks support chaining properties to set the block labels
+ * and calling to provide the block body.
+ *
+ * @see {@link https://www.terraform.io/docs/configuration/syntax.html#blocks|Blocks}
+ */
+export class BlockType {
+  /**
+   * Creates a BlockType instance.
+   *
+   * @param {string} type - Top level block type
+   * @returns {Proxy} Proxy object that handles dynamic property access
+   */
+  constructor(type) {
+    this._type = type;
+
+    return new Proxy(this, {
+      // Handle dynamic property access
+      get(target, property) {
+        if (property in target) {
+          return target[property];
+        }
+
+        // Return an object that handles building the block
+        return new BlockBuilder(target._type, property.toString());
+      }
+    });
+  }
+}
