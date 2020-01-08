@@ -175,13 +175,10 @@ export class CallableObject extends Function {
  *
  * These instances handle chaining properties to set the block labels
  * and support setting the block body by calling the last chained label.
- *
- * This class is implemented using hacks to support chaining and calling, but it works
- * as the eventual goal is to generate JSON files from the Block instances.
  */
-export class BlockBuilder extends CallableObject {
+export class BlockContent extends CallableObject {
   /**
-   * Creates a BlockBuilder instance.
+   * Creates a BlockContent instance.
    *
    * @param {string} type - The type of the block to create
    * @param {string} label - The first block label
@@ -244,8 +241,8 @@ export class TerraformBlock extends CallableObject {
           return target[property];
         }
 
-        // Return an object that handles building the block
-        return new BlockBuilder(target._type, property.toString());
+        // Return an object that handles creating a new Block instance
+        return new BlockContent(target._type, property.toString());
       }
     });
   }
