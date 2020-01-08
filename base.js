@@ -225,9 +225,9 @@ export class BlockBuilder extends CallableObject {
  *
  * @see {@link https://www.terraform.io/docs/configuration/syntax.html#blocks|Blocks}
  */
-export class BlockType extends CallableObject {
+export class TerraformBlock extends CallableObject {
   /**
-   * Creates a BlockType instance.
+   * Creates a TerraformBlock instance.
    *
    * @param {string} type - Top level block type
    * @returns {Proxy} Proxy object that handles dynamic property access

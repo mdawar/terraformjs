@@ -1,11 +1,11 @@
-import { BlockType } from './base.js' ;
+import { TerraformBlock } from './base.js' ;
 
 // Top-level Terraform blocks
-export const terraform = new BlockType('terraform');
-export const provider = new BlockType('provider');
-export const resource = new BlockType('resource');
-export const variable = new BlockType('variable');
-export const module = new BlockType('module');
-export const data = new BlockType('data');
-export const locals = new BlockType('locals');
-export const output = new BlockType('output');
+export const terraform = new TerraformBlock('terraform');
+export const provider = new TerraformBlock('provider');
+export const resource = new TerraformBlock('resource');
+export const variable = new TerraformBlock('variable');
+export const module = new TerraformBlock('module');
+export const data = new TerraformBlock('data');
+export const locals = new TerraformBlock('locals');
+export const output = new TerraformBlock('output');
