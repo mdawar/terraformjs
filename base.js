@@ -152,6 +152,25 @@ export class Block {
 }
 
 /**
+ * Class used to create custom callable objects.
+ *
+ * Subclasses must define a __call__ method that will be called when an instance is called.
+ *
+ * @see {@link https://stackoverflow.com/a/40878674/1209328|Extend Function}
+ */
+export class CallableObject extends Function {
+  constructor() {
+    // Support calling the instance
+    super('...args', 'return this.__self__.__call__(...args)');
+
+    const self = this.bind(this);
+    this.__self__ = self;
+
+    return self;
+  }
+}
+
+/**
  * Class representing a Block instance builder.
  *
  * These instances handle chaining properties to set the block labels
@@ -159,10 +178,8 @@ export class Block {
  *
  * This class is implemented using hacks to support chaining and calling, but it works
  * as the eventual goal is to generate JSON files from the Block instances.
- *
- * @see {@link https://stackoverflow.com/a/40878674/1209328|Extend Function}
  */
-export class BlockBuilder extends Function {
+export class BlockBuilder extends CallableObject {
   /**
    * Creates a BlockBuilder instance.
    *
@@ -171,16 +188,12 @@ export class BlockBuilder extends Function {
    * @returns {Proxy} Proxy object that handles dynamic property access
    */
   constructor(type, label) {
-    // Support calling the instance
-    super('...args', 'return this.__self__.__call__(...args)');
+    super();
 
-    const self = this.bind(this);
-    this.__self__ = self;
+    this._type = type;
+    this._labels = [label];
 
-    self._type = type;
-    self._labels = [label];
-
-    return new Proxy(self, {
+    return new Proxy(this, {
       // Handle chaining labels
       get(target, property) {
         // Add the chained label to the labels list
@@ -212,7 +225,7 @@ export class BlockBuilder extends Function {
  *
  * @see {@link https://www.terraform.io/docs/configuration/syntax.html#blocks|Blocks}
  */
-export class BlockType {
+export class BlockType extends CallableObject {
   /**
    * Creates a BlockType instance.
    *
@@ -220,6 +233,8 @@ export class BlockType {
    * @returns {Proxy} Proxy object that handles dynamic property access
    */
   constructor(type) {
+    super();
+
     this._type = type;
 
     return new Proxy(this, {
@@ -233,5 +248,16 @@ export class BlockType {
         return new BlockBuilder(target._type, property.toString());
       }
     });
+  }
+
+  /**
+   * Handle calling top-level blocks without any labels to create a Block instance.
+   *
+   * @param {object} body - Object of the configuration arguments of the block
+   * @returns {Block} Block object
+   */
+  __call__(body = {}) {
+    // Pass an empty labels array
+    return new Block(this._type, [], body);
   }
 }
