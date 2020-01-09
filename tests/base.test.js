@@ -1,4 +1,4 @@
-import { Interpolation } from '../api.js';
+import { Interpolation } from '../base.js';
 
 describe('Interpolation class', () => {
   test('Expression is wrapped in ${}', () => {
