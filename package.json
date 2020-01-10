@@ -15,5 +15,8 @@
     "@babel/preset-env": "^7.7.7",
     "babel-jest": "^24.9.0",
     "jest": "^24.9.0"
+  },
+  "bin": {
+    "terraformjs": "./cli.js"
   }
 }
