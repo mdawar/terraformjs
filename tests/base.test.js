@@ -1,4 +1,4 @@
-import { Interpolation, Block } from '../src/base.js';
+import { Interpolation, Block, CallableObject } from '../src/base.js';
 
 describe('Interpolation class', () => {
   test('Chaining a property on an Interpolation instance returns another Interpolation instance', () => {
@@ -123,5 +123,19 @@ describe('Block class', () => {
     const output = new Block('output', ['ip_addr']);
 
     expect(String(output)).toEqual('${output.ip_addr}');
+  });
+});
+
+describe('CallableObject class', () => {
+  test('Creating a CallableObject instance', () => {
+    const callable = new CallableObject();
+
+    const mockFn = jest.fn(x => x + 1);
+
+    callable.__call__ = mockFn;
+
+    expect(callable(5)).toBe(6);
+    expect(mockFn.mock.calls.length).toBe(1);
+    expect(mockFn.mock.results[0].value).toBe(6);
   });
 });
