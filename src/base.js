@@ -68,7 +68,7 @@ export class Block {
    * @param {Object} body - Block body
    * @returns {Proxy} Proxy object that handles dynamic property access
    */
-  constructor(type, labels, body) {
+  constructor(type, labels = [], body = {}) {
     this._type = type;
     this._labels = labels;
     this._body = body;
