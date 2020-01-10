@@ -188,11 +188,15 @@ export class BlockContent extends CallableObject {
     super();
 
     this._type = type;
-    this._labels = [label];
+    this._labels = label ? [label] : [];
 
     return new Proxy(this, {
       // Handle chaining labels
       get(target, property) {
+        if (property in target) {
+          return target[property];
+        }
+
         // Add the chained label to the labels list
         target._labels.push(property.toString());
 
