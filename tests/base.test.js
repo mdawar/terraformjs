@@ -1,4 +1,4 @@
-import { Interpolation, Block, CallableObject } from '../src/base.js';
+import { Interpolation, Block, CallableObject, BlockContent } from '../src/base.js';
 
 describe('Interpolation class', () => {
   test('Chaining a property on an Interpolation instance returns another Interpolation instance', () => {
@@ -137,5 +137,61 @@ describe('CallableObject class', () => {
     expect(callable(5)).toBe(6);
     expect(mockFn.mock.calls.length).toBe(1);
     expect(mockFn.mock.results[0].value).toBe(6);
+  });
+});
+
+describe('BlockContent class', () => {
+  test('Creating a BlockContent instance', () => {
+    const blockContent = new BlockContent();
+
+    expect(blockContent._type).toBeUndefined();
+    expect(blockContent._labels).toEqual([]);
+
+    const block = blockContent();
+
+    expect(block).toBeInstanceOf(Block);
+    expect(block._type).toBeUndefined();
+    expect(block._labels).toEqual([]);
+    expect(block._body).toEqual({});
+  });
+
+  test('Chaining properties on a BlockContent instance to add the labels', () => {
+    const blockContent = new BlockContent();
+
+    blockContent.label_one.label_two.label_three
+
+    expect(blockContent._labels).toEqual(['label_one', 'label_two', 'label_three']);
+  });
+
+  test('Calling any chained property on the BlockContent instance', () => {
+    const blockContent = new BlockContent();
+
+    const block = blockContent.label_one.label_two.label_three()
+
+    expect(block).toBeInstanceOf(Block);
+    expect(block._type).toBeUndefined();
+    expect(blockContent._labels).toEqual(['label_one', 'label_two', 'label_three']);
+    expect(block._body).toEqual({});
+  });
+
+  test('Creating Block instance using a BlockContent instance', () => {
+    const blockContent = new BlockContent('resource', 'aws_instance');
+
+    const block = blockContent.web({
+      instance_type: 't2.micro',
+      tags: {
+        Name: 'web'
+      }
+    });
+
+    expect(block).toBeInstanceOf(Block);
+    expect(block._type).toEqual('resource');
+    expect(block._labels).toEqual(['aws_instance', 'web']);
+    expect(block._body).toEqual({
+      instance_type: 't2.micro',
+      tags: {
+        Name: 'web'
+      }
+    });
   });
 });
