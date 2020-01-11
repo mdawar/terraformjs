@@ -1,4 +1,4 @@
-import { Interpolation, Block, CallableObject, BlockContent } from '../src/base.js';
+import { Interpolation, Block, CallableObject, BlockContent, TerraformBlock } from '../src/base.js';
 
 describe('Interpolation class', () => {
   test('Chaining a property on an Interpolation instance returns another Interpolation instance', () => {
@@ -191,6 +191,43 @@ describe('BlockContent class', () => {
       instance_type: 't2.micro',
       tags: {
         Name: 'web'
+      }
+    });
+  });
+});
+
+describe('TerraformBlock class', () => {
+  test('Creating a TerraformBlock instance', () => {
+    const instance = new TerraformBlock('resource');
+
+    expect(instance._type).toEqual('resource');
+  });
+
+  test('Accessing any property on a TerraformBlock instance returns a BlockContent instance', () => {
+    const instance = new TerraformBlock('resource');
+
+    const blockContent = instance.custom_prop;
+
+    expect(blockContent).toBeInstanceOf(BlockContent);
+    expect(blockContent._type).toEqual('resource');
+    expect(blockContent._labels).toEqual(['custom_prop']);
+  });
+
+  test('Calling a TerraformBlock instance returns a Block instance', () => {
+    const instance = new TerraformBlock('terraform');
+
+    const block = instance({
+      required_providers: {
+        aws: '>= 2.7.0'
+      }
+    });
+
+    expect(block).toBeInstanceOf(Block);
+    expect(block._type).toEqual('terraform');
+    expect(block._labels).toEqual([]);
+    expect(block._body).toEqual({
+      required_providers: {
+        aws: '>= 2.7.0'
       }
     });
   });
