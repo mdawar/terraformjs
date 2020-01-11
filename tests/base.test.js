@@ -21,6 +21,12 @@ describe('Interpolation class', () => {
     expect(String(expr)).toBe('${var.foo}');
   });
 
+  test('Creating a JSON string from an Interpolation instance', () => {
+    const expr = new Interpolation('var.foo');
+
+    expect(JSON.stringify(expr)).toBe('"${var.foo}"');
+  });
+
   test('Accessing a dynamic property appends the property to the expression', () => {
     const expr = new Interpolation('aws_instance.www');
 
@@ -124,6 +130,12 @@ describe('Block class', () => {
 
     expect(String(output)).toEqual('${output.ip_addr}');
   });
+
+  test('Creating a JSON string from a Block instance', () => {
+    const block = new Block('resource', ['aws_instance', 'web']);
+
+    expect(JSON.stringify(block)).toBe('"${aws_instance.web}"');
+  });
 });
 
 describe('CallableObject class', () => {
@@ -201,6 +213,17 @@ describe('TerraformBlock class', () => {
     const instance = new TerraformBlock('resource');
 
     expect(instance._type).toEqual('resource');
+  });
+
+  test('Calling a TerraformBlock instance', () => {
+    const instance = new TerraformBlock('resource');
+
+    const block = instance();
+
+    expect(block).toBeInstanceOf(Block);
+    expect(block._type).toEqual('resource');
+    expect(block._labels).toEqual([]);
+    expect(block._body).toEqual({});
   });
 
   test('Accessing any property on a TerraformBlock instance returns a BlockContent instance', () => {
