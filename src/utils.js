@@ -21,6 +21,26 @@ export async function getFiles(dir, ext) {
 }
 
 /**
+ * Creates an object from a Block instance.
+ *
+ * @param {Block} block - Block instance
+ */
+export function createBlockObject(block) {
+  // Create a nested object from the block labels
+  const blockObject = block[LABELS].reduceRight(
+    (value, key) => {
+      return {[key]: value};
+    },
+    // Start with the block body as the initial value
+    block[BODY]
+  );
+
+  return {
+    [block[TYPE]]: blockObject
+  };
+}
+
+/**
  * Writes a JSON file from the array of the Block instances.
  *
  * @param {string} path - Path where to write the generated JSON file
@@ -28,20 +48,17 @@ export async function getFiles(dir, ext) {
  * @returns {Promise}
  */
 export function generateJSON(path, blocks) {
-  // Loop through Block instances
-  const objects = blocks.map((block) => {
-    // Create a nested object from the block labels
-    const blockObject = block[LABELS].reduceRight(
-      (value, key) => {
-        return {[key]: value};
-      },
-      // Start with the block body as the initial value
-      block[BODY]
-    );
+  const objects = [];
 
-    return {
-      [block[TYPE]]: blockObject
-    };
+  blocks.forEach((value) => {
+    // The exported value might be an array of Block instances
+    if (Array.isArray(value)) {
+      value.forEach((block) => {
+        objects.push(createBlockObject(block));
+      });
+    } else {
+      objects.push(createBlockObject(value));
+    }
   });
 
   return fs.writeFile(path, JSON.stringify(objects, null, 2), 'utf8');
