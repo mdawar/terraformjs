@@ -1,4 +1,5 @@
 import { promises as fs } from 'fs';
+import path from 'path';
 
 /**
  * Global Terraform block symbols.
@@ -17,7 +18,11 @@ const BODY = Symbol.for('body');
 export async function getFiles(dir, ext) {
   const files = await fs.readdir(dir);
 
-  return files.filter(f => f.endsWith(ext));
+  const stat = await Promise.all(files.map(fs.stat));
+
+  return files.filter((f, i) => {
+    return stat[i].isFile() && f.endsWith(ext);
+  });
 }
 
 /**
