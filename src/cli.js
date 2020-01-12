@@ -11,15 +11,19 @@ const cwd = process.cwd();
 
   files.forEach(file => {
     (async () => {
-      const fullPath = path.join(cwd, file);
+      try {
+        const fullPath = path.join(cwd, file);
 
-      const blocks = await import(fullPath);
+        const blocks = await import(fullPath);
 
-      generateJSON(
-        fullPath.replace('.tf.js', '.tf.json'),
-        // Array of the exported Block instances
-        Object.values(blocks)
-      );
+        generateJSON(
+          fullPath.replace('.tf.js', '.tf.json'),
+          // Array of the exported Block instances
+          Object.values(blocks)
+        );
+      } catch (err) {
+        console.error(`Error processing the module ${file}: ${err}`);
+      }
     })();
   });
 })();
