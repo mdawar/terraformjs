@@ -1,4 +1,4 @@
-import { Interpolation, Block, CallableObject, BlockContent, TerraformBlock } from '../src/base.js';
+import { TYPE, LABELS, BODY, Interpolation, Block, CallableObject, BlockContent, TerraformBlock } from '../src/base.js';
 
 describe('Interpolation class', () => {
   test('Chaining a property on an Interpolation instance returns another Interpolation instance', () => {
@@ -68,9 +68,9 @@ describe('Block class', () => {
   test('Creating an empty Block instance', () => {
     const block = new Block();
 
-    expect(block._type).toBeUndefined();
-    expect(block._labels).toEqual([]);
-    expect(block._body).toEqual({});
+    expect(block[TYPE]).toBeUndefined();
+    expect(block[LABELS]).toEqual([]);
+    expect(block[BODY]).toEqual({});
     expect(String(block)).toEqual('${}');
   });
 
@@ -156,15 +156,15 @@ describe('BlockContent class', () => {
   test('Creating a BlockContent instance', () => {
     const blockContent = new BlockContent();
 
-    expect(blockContent._type).toBeUndefined();
-    expect(blockContent._labels).toEqual([]);
+    expect(blockContent[TYPE]).toBeUndefined();
+    expect(blockContent[LABELS]).toEqual([]);
 
     const block = blockContent();
 
     expect(block).toBeInstanceOf(Block);
-    expect(block._type).toBeUndefined();
-    expect(block._labels).toEqual([]);
-    expect(block._body).toEqual({});
+    expect(block[TYPE]).toBeUndefined();
+    expect(block[LABELS]).toEqual([]);
+    expect(block[BODY]).toEqual({});
   });
 
   test('Chaining properties on a BlockContent instance to add the labels', () => {
@@ -172,7 +172,7 @@ describe('BlockContent class', () => {
 
     blockContent.label_one.label_two.label_three
 
-    expect(blockContent._labels).toEqual(['label_one', 'label_two', 'label_three']);
+    expect(blockContent[LABELS]).toEqual(['label_one', 'label_two', 'label_three']);
   });
 
   test('Calling any chained property on the BlockContent instance', () => {
@@ -181,9 +181,9 @@ describe('BlockContent class', () => {
     const block = blockContent.label_one.label_two.label_three()
 
     expect(block).toBeInstanceOf(Block);
-    expect(block._type).toBeUndefined();
-    expect(blockContent._labels).toEqual(['label_one', 'label_two', 'label_three']);
-    expect(block._body).toEqual({});
+    expect(block[TYPE]).toBeUndefined();
+    expect(blockContent[LABELS]).toEqual(['label_one', 'label_two', 'label_three']);
+    expect(block[BODY]).toEqual({});
   });
 
   test('Creating Block instance using a BlockContent instance', () => {
@@ -197,9 +197,9 @@ describe('BlockContent class', () => {
     });
 
     expect(block).toBeInstanceOf(Block);
-    expect(block._type).toEqual('resource');
-    expect(block._labels).toEqual(['aws_instance', 'web']);
-    expect(block._body).toEqual({
+    expect(block[TYPE]).toEqual('resource');
+    expect(block[LABELS]).toEqual(['aws_instance', 'web']);
+    expect(block[BODY]).toEqual({
       instance_type: 't2.micro',
       tags: {
         Name: 'web'
@@ -212,7 +212,7 @@ describe('TerraformBlock class', () => {
   test('Creating a TerraformBlock instance', () => {
     const instance = new TerraformBlock('resource');
 
-    expect(instance._type).toEqual('resource');
+    expect(instance[TYPE]).toEqual('resource');
   });
 
   test('Calling a TerraformBlock instance', () => {
@@ -221,9 +221,9 @@ describe('TerraformBlock class', () => {
     const block = instance();
 
     expect(block).toBeInstanceOf(Block);
-    expect(block._type).toEqual('resource');
-    expect(block._labels).toEqual([]);
-    expect(block._body).toEqual({});
+    expect(block[TYPE]).toEqual('resource');
+    expect(block[LABELS]).toEqual([]);
+    expect(block[BODY]).toEqual({});
   });
 
   test('Accessing any property on a TerraformBlock instance returns a BlockContent instance', () => {
@@ -232,8 +232,8 @@ describe('TerraformBlock class', () => {
     const blockContent = instance.custom_prop;
 
     expect(blockContent).toBeInstanceOf(BlockContent);
-    expect(blockContent._type).toEqual('resource');
-    expect(blockContent._labels).toEqual(['custom_prop']);
+    expect(blockContent[TYPE]).toEqual('resource');
+    expect(blockContent[LABELS]).toEqual(['custom_prop']);
   });
 
   test('Calling a TerraformBlock instance returns a Block instance', () => {
@@ -246,9 +246,9 @@ describe('TerraformBlock class', () => {
     });
 
     expect(block).toBeInstanceOf(Block);
-    expect(block._type).toEqual('terraform');
-    expect(block._labels).toEqual([]);
-    expect(block._body).toEqual({
+    expect(block[TYPE]).toEqual('terraform');
+    expect(block[LABELS]).toEqual([]);
+    expect(block[BODY]).toEqual({
       required_providers: {
         aws: '>= 2.7.0'
       }

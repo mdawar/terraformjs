@@ -1,4 +1,13 @@
 /**
+ * Global symbols used to identify the Terraform block parts.
+ *
+ * @type {symbol}
+ */
+export const TYPE = Symbol.for('type');
+export const LABELS = Symbol.for('labels');
+export const BODY = Symbol.for('body');
+
+/**
  * Class respresenting the interpolation syntax in Terraform.
  * The interpolations are wrapped in ${}, such as ${var.foo}.
  *
@@ -69,9 +78,9 @@ export class Block {
    * @returns {Proxy} Proxy object that handles dynamic property access
    */
   constructor(type, labels = [], body = {}) {
-    this._type = type;
-    this._labels = labels;
-    this._body = body;
+    this[TYPE] = type;
+    this[LABELS] = labels;
+    this[BODY] = body;
 
     return new Proxy(this, {
       // Handle access to non existent properties
@@ -95,7 +104,7 @@ export class Block {
   getExpression(prop) {
     const parts = [];
 
-    switch (this._type) {
+    switch (this[TYPE]) {
       // Types that are omitted from the beginning of the expression
       case 'resource':
       case 'provider':
@@ -110,15 +119,15 @@ export class Block {
         break;
 
       default:
-        parts.push(this._type);
+        parts.push(this[TYPE]);
         break;
     }
 
-    parts.push(...this._labels);
+    parts.push(...this[LABELS]);
 
-    if (this._type === 'provider') {
-      if (this._body && this._body.alias) {
-        parts.push(this._body.alias);
+    if (this[TYPE] === 'provider') {
+      if (this[BODY] && this[BODY].alias) {
+        parts.push(this[BODY].alias);
       } else if (prop == 'alias') {
         // Return the <PROVIDER>.default if the alias is requested
         parts.push('default');
@@ -126,7 +135,7 @@ export class Block {
     }
 
     // Provider reference expressions are not wrapped in ${}
-    if (this._type === 'provider') {
+    if (this[TYPE] === 'provider') {
       return parts.join('.');
     } else {
       if (prop) {
@@ -187,8 +196,8 @@ export class BlockContent extends CallableObject {
   constructor(type, label) {
     super();
 
-    this._type = type;
-    this._labels = label ? [label] : [];
+    this[TYPE] = type;
+    this[LABELS] = label ? [label] : [];
 
     return new Proxy(this, {
       // Handle chaining labels
@@ -198,7 +207,7 @@ export class BlockContent extends CallableObject {
         }
 
         // Add the chained label to the labels list
-        target._labels.push(property.toString());
+        target[LABELS].push(property.toString());
 
         // Return a proxy to the same object with the new labels
         // and the same handlers (this refers to the handler object)
@@ -214,7 +223,7 @@ export class BlockContent extends CallableObject {
    * @returns {Block} Block object
    */
   __call__(body = {}) {
-    return new Block(this._type, this._labels, body);
+    return new Block(this[TYPE], this[LABELS], body);
   }
 }
 
@@ -236,7 +245,7 @@ export class TerraformBlock extends CallableObject {
   constructor(type) {
     super();
 
-    this._type = type;
+    this[TYPE] = type;
 
     return new Proxy(this, {
       // Handle dynamic property access
@@ -246,7 +255,7 @@ export class TerraformBlock extends CallableObject {
         }
 
         // Return an object that handles creating a new Block instance
-        return new BlockContent(target._type, property.toString());
+        return new BlockContent(target[TYPE], property.toString());
       }
     });
   }
@@ -259,6 +268,6 @@ export class TerraformBlock extends CallableObject {
    */
   __call__(body = {}) {
     // Pass an empty labels array
-    return new Block(this._type, [], body);
+    return new Block(this[TYPE], [], body);
   }
 }
