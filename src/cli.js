@@ -9,7 +9,7 @@ const cwd = process.cwd();
 (async () => {
   const files = await getFiles(cwd, '.tf.js');
 
-  files.forEach((file) => {
+  files.forEach(file => {
     (async () => {
       const fullPath = path.join(cwd, file);
 

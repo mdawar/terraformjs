@@ -1,4 +1,4 @@
-import { TerraformBlock } from './base.js' ;
+import { TerraformBlock } from './base.js';
 
 // Top-level Terraform blocks
 export const terraform = new TerraformBlock('terraform');

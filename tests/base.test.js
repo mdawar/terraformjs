@@ -1,4 +1,13 @@
-import { TYPE, LABELS, BODY, Interpolation, Block, CallableObject, BlockContent, TerraformBlock } from '../src/base.js';
+import {
+  TYPE,
+  LABELS,
+  BODY,
+  Interpolation,
+  Block,
+  CallableObject,
+  BlockContent,
+  TerraformBlock
+} from '../src/base.js';
 
 describe('Interpolation class', () => {
   test('Chaining a property on an Interpolation instance returns another Interpolation instance', () => {
@@ -42,7 +51,9 @@ describe('Interpolation class', () => {
   test('Chaining dynamic properties appends the properties to the expression', () => {
     const expr = new Interpolation('aws_instance.www');
 
-    expect(String(expr.first.second.third)).toBe('${aws_instance.www.first.second.third}');
+    expect(String(expr.first.second.third)).toBe(
+      '${aws_instance.www.first.second.third}'
+    );
   });
 
   test('Using a dynamic index appends the index to the expression', () => {
@@ -60,7 +71,9 @@ describe('Interpolation class', () => {
   test('Chaining dynamic properties and indexes appends the properties and indexes to the expression', () => {
     const expr = new Interpolation('aws_instance.www');
 
-    expect(String(expr.first[0].second[1].third[100])).toBe('${aws_instance.www.first[0].second[1].third[100]}');
+    expect(String(expr.first[0].second[1].third[100])).toBe(
+      '${aws_instance.www.first[0].second[1].third[100]}'
+    );
   });
 });
 
@@ -170,19 +183,27 @@ describe('BlockContent class', () => {
   test('Chaining properties on a BlockContent instance to add the labels', () => {
     const blockContent = new BlockContent();
 
-    blockContent.label_one.label_two.label_three
+    blockContent.label_one.label_two.label_three;
 
-    expect(blockContent[LABELS]).toEqual(['label_one', 'label_two', 'label_three']);
+    expect(blockContent[LABELS]).toEqual([
+      'label_one',
+      'label_two',
+      'label_three'
+    ]);
   });
 
   test('Calling any chained property on the BlockContent instance', () => {
     const blockContent = new BlockContent();
 
-    const block = blockContent.label_one.label_two.label_three()
+    const block = blockContent.label_one.label_two.label_three();
 
     expect(block).toBeInstanceOf(Block);
     expect(block[TYPE]).toBeUndefined();
-    expect(blockContent[LABELS]).toEqual(['label_one', 'label_two', 'label_three']);
+    expect(blockContent[LABELS]).toEqual([
+      'label_one',
+      'label_two',
+      'label_three'
+    ]);
     expect(block[BODY]).toEqual({});
   });
 

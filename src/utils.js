@@ -17,7 +17,7 @@ const BODY = Symbol.for('body');
 export async function getFiles(dir, ext) {
   const files = await fs.readdir(dir);
 
-  return files.filter((f) => f.endsWith(ext));
+  return files.filter(f => f.endsWith(ext));
 }
 
 /**
@@ -29,7 +29,7 @@ export function createBlockObject(block) {
   // Create a nested object from the block labels
   const blockObject = block[LABELS].reduceRight(
     (value, key) => {
-      return {[key]: value};
+      return { [key]: value };
     },
     // Start with the block body as the initial value
     block[BODY]
@@ -50,10 +50,10 @@ export function createBlockObject(block) {
 export function generateJSON(path, blocks) {
   const objects = [];
 
-  blocks.forEach((value) => {
+  blocks.forEach(value => {
     // The exported value might be an array of Block instances
     if (Array.isArray(value)) {
-      value.forEach((block) => {
+      value.forEach(block => {
         objects.push(createBlockObject(block));
       });
     } else {
