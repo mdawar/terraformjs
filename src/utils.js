@@ -16,13 +16,16 @@ const BODY = Symbol.for('body');
  * @returns {string[]} Array of matching file names
  */
 export async function getFiles(dir, ext) {
-  const files = await fs.readdir(dir);
+  // An array of fs.Dirent objects when using withFileTypes
+  const files = await fs.readdir(dir, { withFileTypes: true });
 
-  const stat = await Promise.all(files.map(fs.stat));
-
-  return files.filter((f, i) => {
-    return stat[i].isFile() && f.endsWith(ext);
-  });
+  return (
+    files
+      // Keep only the files that end with the extension
+      .filter(f => f.isFile() && f.name.endsWith(ext))
+      // Then create an array of the file names
+      .map(f => f.name)
+  );
 }
 
 /**
