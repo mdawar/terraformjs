@@ -1,11 +1,12 @@
 import fs from 'fs';
-import { getFiles, createBlockObject } from '../src/utils.js';
+import { getFiles, createBlockObject, generateJSON } from '../src/utils.js';
 import { Block } from '../src/base.js';
 
 jest.mock('fs', () => {
   return {
     promises: {
-      readdir: jest.fn()
+      readdir: jest.fn(),
+      writeFile: jest.fn()
     }
   };
 });
@@ -143,5 +144,145 @@ describe('createBlockObject function', () => {
         }
       }
     });
+  });
+});
+
+describe('generateJSON function', () => {
+  test('Generating a JSON file from an empty array', async () => {
+    fs.promises.writeFile.mockResolvedValue();
+
+    await generateJSON('/path/to/file.json', []);
+
+    expect(fs.promises.writeFile).toBeCalledWith(
+      '/path/to/file.json',
+      '[]',
+      'utf8'
+    );
+  });
+
+  test('Generating a JSON file from an array of non Block instances', async () => {
+    fs.promises.writeFile.mockResolvedValue();
+
+    // All the values that are not instances of Block are ignored
+    await generateJSON('/path/to/file.json', ['string', 1]);
+
+    expect(fs.promises.writeFile).toBeCalledWith(
+      '/path/to/file.json',
+      '[]',
+      'utf8'
+    );
+  });
+
+  test('Generating a JSON file from an array of Block instances', async () => {
+    fs.promises.writeFile.mockResolvedValue();
+
+    const blocks = [
+      new Block('resource', ['aws_instance', 'web'], {
+        instance_type: 't2.micro'
+      }),
+      new Block('provider', ['aws'], { region: 'us-east-1' }),
+      new Block('output', ['ip_address'], {
+        value: '${aws_instance.web.public_ip}'
+      })
+    ];
+
+    const objects = [
+      {
+        resource: {
+          aws_instance: {
+            web: {
+              instance_type: 't2.micro'
+            }
+          }
+        }
+      },
+      {
+        provider: {
+          aws: {
+            region: 'us-east-1'
+          }
+        }
+      },
+      {
+        output: {
+          ip_address: {
+            value: '${aws_instance.web.public_ip}'
+          }
+        }
+      }
+    ];
+
+    await generateJSON('/path/to/file.json', blocks);
+
+    expect(fs.promises.writeFile).toBeCalledWith(
+      '/path/to/file.json',
+      JSON.stringify(objects, null, 2),
+      'utf8'
+    );
+  });
+
+  test('Generating a JSON file from nested arrays of Block instances', async () => {
+    fs.promises.writeFile.mockResolvedValue();
+
+    const blocks = [
+      new Block('resource', ['aws_instance', 'web'], {
+        instance_type: 't2.micro'
+      }),
+      // Nested array
+      [new Block('provider', ['aws'], { region: 'us-east-1' })],
+      [
+        [
+          new Block('output', ['ip_address'], {
+            value: '${aws_instance.web.public_ip}'
+          })
+        ]
+      ]
+    ];
+
+    const objects = [
+      {
+        resource: {
+          aws_instance: {
+            web: {
+              instance_type: 't2.micro'
+            }
+          }
+        }
+      },
+      {
+        provider: {
+          aws: {
+            region: 'us-east-1'
+          }
+        }
+      },
+      {
+        output: {
+          ip_address: {
+            value: '${aws_instance.web.public_ip}'
+          }
+        }
+      }
+    ];
+
+    await generateJSON('/path/to/file.json', blocks);
+
+    expect(fs.promises.writeFile).toBeCalledWith(
+      '/path/to/file.json',
+      JSON.stringify(objects, null, 2),
+      'utf8'
+    );
+  });
+
+  test('fs.writeFile rejecting with an error', async () => {
+    expect.assertions(1);
+
+    fs.promises.writeFile.mockRejectedValue(
+      new Error('Error writing the file')
+    );
+
+    return await expect(generateJSON('/path/to/file.json', [])).rejects.toThrow(
+      'Error writing the file'
+    );
   });
 });
