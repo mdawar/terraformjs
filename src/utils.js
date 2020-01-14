@@ -15,7 +15,7 @@ const BODY = Symbol.for('body');
  * @param {string} ext - File extension to match
  * @returns {string[]} Array of matching file names
  */
-export async function getFiles(dir, ext) {
+export async function getFiles(dir, ext = '') {
   // An array of fs.Dirent objects when using withFileTypes
   const files = await fs.readdir(dir, { withFileTypes: true });
 
