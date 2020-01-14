@@ -35,6 +35,22 @@ async function generateFiles(dir) {
 }
 
 /**
+ * Removes all the tf.json files from a directory.
+ *
+ * @param {string} dir - Directory path
+ * @returns {string[]} Array of removed JSON files
+ */
+async function removeFiles(dir) {
+  const files = await getFiles(dir, '.tf.json');
+
+  for (const file of files) {
+    await fs.promises.unlink(path.join(dir, file));
+  }
+
+  return files;
+}
+
+/**
  * Executes Terraform with the passed arguments.
  *
  * @param {string[]} args - Array of arguments to pass to terraform
@@ -59,10 +75,23 @@ function executeTerraform(args) {
  */
 async function run(generate = true, execute = true) {
   if (generate) {
-    try {
-      const files = await generateFiles(process.cwd());
+    const cwd = process.cwd();
 
-      console.log(`Generated: ${files.join(', ')}`);
+    try {
+      const files = await removeFiles(cwd);
+
+      if (files.length > 0) {
+        console.log(`Deleted: ${files.join(', ')}`);
+      }
+    } catch (err) {
+      console.error(`Error removing the previously generated files: ${err}`);
+      process.exit(1);
+    }
+
+    try {
+      const files = await generateFiles(cwd);
+
+      console.log(`Generated: ${files.join(', ')}\n`);
     } catch (err) {
       console.error(`Error generating the JSON files: ${err}`);
       process.exit(1);
