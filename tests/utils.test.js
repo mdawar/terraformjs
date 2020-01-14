@@ -1,5 +1,6 @@
 import fs from 'fs';
-import { getFiles } from '../src/utils.js';
+import { getFiles, createBlockObject } from '../src/utils.js';
+import { Block } from '../src/base.js';
 
 jest.mock('fs', () => {
   return {
@@ -84,5 +85,63 @@ describe('getFiles function', () => {
     return await expect(getFiles('/path/to/dir')).rejects.toThrow(
       'Permission denied'
     );
+  });
+});
+
+describe('createBlockObject function', () => {
+  test('Creating an object from an empty Block instance', () => {
+    const block = new Block();
+
+    expect(createBlockObject(block)).toEqual({});
+  });
+
+  test('Creating an object from a Block instance with a type only', () => {
+    const block = new Block('resource');
+
+    expect(createBlockObject(block)).toEqual({ resource: {} });
+  });
+
+  test('Creating an object from a Block instance with a type and labels', () => {
+    const block = new Block('resource', ['aws_instance', 'web']);
+
+    expect(createBlockObject(block)).toEqual({
+      resource: {
+        aws_instance: {
+          web: {}
+        }
+      }
+    });
+  });
+
+  test('Creating an object from a Block instance with a type, labels and body', () => {
+    const block = new Block('resource', ['aws_instance', 'web'], {
+      instance_type: 't2.micro'
+    });
+
+    expect(createBlockObject(block)).toEqual({
+      resource: {
+        aws_instance: {
+          web: {
+            instance_type: 't2.micro'
+          }
+        }
+      }
+    });
+  });
+
+  test('Creating an object from a Block instance without labels', () => {
+    const block = new Block('terraform', [], {
+      required_version: {
+        aws: '~> 2.0'
+      }
+    });
+
+    expect(createBlockObject(block)).toEqual({
+      terraform: {
+        required_version: {
+          aws: '~> 2.0'
+        }
+      }
+    });
   });
 });
