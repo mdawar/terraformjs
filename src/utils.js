@@ -43,9 +43,11 @@ export function createBlockObject(block) {
     block[BODY]
   );
 
-  return {
-    [block[TYPE]]: blockObject
-  };
+  return block[TYPE]
+    ? {
+        [block[TYPE]]: blockObject
+      }
+    : {};
 }
 
 /**
