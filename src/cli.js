@@ -132,12 +132,25 @@ async function run(generate = true, execute = true) {
 const args = process.argv.slice(2);
 const cmd = args[0];
 
+const versionArgs = ['-v', '-version', '--version', 'version'];
+
+// Skip generating the JSON files for these command line arguments
+const skipGenerateArgs = [
+  undefined,
+  '-h',
+  '-help',
+  '--help',
+  'help',
+  '0.12upgrade',
+  'fmt'
+];
+
 // Flag to generate the JSON files
 let generate = true;
 // Flag to execute Terraform
 let execute = true;
 
-if (['-v', '-version', '--version', 'version'].includes(cmd)) {
+if (versionArgs.includes(cmd)) {
   generate = false;
 
   const dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -147,9 +160,7 @@ if (['-v', '-version', '--version', 'version'].includes(cmd)) {
   );
 
   console.log(`TerraformJS v${pkg.version}`);
-} else if (
-  ['-h', '-help', '--help', 'help', '0.12upgrade', 'fmt'].includes(cmd)
-) {
+} else if (skipGenerateArgs.includes(cmd)) {
   generate = false;
 } else if (cmd === 'generate') {
   // Generate the JSON files without executing Terraform
