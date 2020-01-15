@@ -68,6 +68,18 @@ function executeTerraform(args) {
 }
 
 /**
+ * Returns a string wrapped with ANSI escape sequences.
+ *
+ * @see {@link https://en.wikipedia.org/wiki/ANSI_escape_code#Colors}
+ *
+ * @param {string} text - String to colorize
+ * @param {string} code - ANSI code
+ */
+function colorize(text, code) {
+  return `\x1b[${code}m${text}\x1b[0m`;
+}
+
+/**
  * Generate the JSON files and execute Terraform afterwards.
  *
  * @param {bool} generate - Generate the JSON files
@@ -81,19 +93,32 @@ async function run(generate = true, execute = true) {
       const files = await removeFiles(cwd);
 
       if (files.length > 0) {
-        console.log(`Deleted: ${files.join(', ')}`);
+        console.log(
+          `${colorize('Removed files:', '31;1')} ${files.join(', ')}`
+        );
       }
     } catch (err) {
-      console.error(`Error removing the previously generated files: ${err}`);
+      console.error(
+        `${colorize(
+          'Error removing the previously generated files:',
+          '31;1'
+        )} ${err}`
+      );
+
       process.exit(1);
     }
 
     try {
       const files = await generateFiles(cwd);
 
-      console.log(`Generated: ${files.join(', ')}\n`);
+      console.log(
+        `${colorize('Generated files:', '36;1')} ${files.join(', ')}`
+      );
     } catch (err) {
-      console.error(`Error generating the JSON files: ${err}`);
+      console.error(
+        `${colorize('Error generating the JSON files:', '31;1')} ${err}`
+      );
+
       process.exit(1);
     }
   }
