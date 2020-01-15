@@ -1,12 +1,38 @@
 # TerraformJS
 
-TerraformJS is a wrapper for [Terraform](https://www.terraform.io/) that allows you to write your configuration in JavaScript.
+TerraformJS is a wrapper for [Terraform](https://www.terraform.io/) that allows you to write your infrastructure configurations in JavaScript.
+
+## Requirements
+
+- **Node.js** 13.2.0+ (With ES modules enabled by default)
+- **Terraform** 0.12+
 
 ## Overview
 
 You can write your Terraform configuration using JavaScript modules named with a `.tf.js` suffix, TerraformJS imports these modules and generates Terraform [JSON configuration](https://www.terraform.io/docs/configuration/syntax-json.html) files named with a `.tf.json` suffix.
 
 Terraform loads these `.tf.json` files along with your `.tf` files, so you can use TerraformJS in your current Terraform project without changing anything at all, you can just add new `.tf.js` files for your configurations that need some programming features that don't exist in the [native Terraform language syntax](https://www.terraform.io/docs/configuration/syntax.html).
+
+## Why?
+
+- Write your infrastructure configuration files in a language you already know
+- Use programming features that are not available in Terraform's language syntax (HCL)
+- Import your configuration data from databases, files or any other source
+
+## Features
+
+- Drop in replacement command for the `terraform` CLI
+- Small API and easy to learn (Only top-level blocks are pre-defined everything else is dynamic)
+- Can be used in an existing Terraform project without any changes, you can use both JavaScript configuration files `.tf.js` and Terraform's configuration language files `.tf` in the same project
+
+## How it works?
+
+When you use the `terraformjs` command instead of `terraform`:
+
+1. The previously generated `.tf.json` files are removed if any
+2. The `.tf.js` files are imported and the exports are used to generate the `.tf.json` files
+3. Terraform is executed with any passed command line arguments
+4. After Terraform's execution is complete all the generated `.tf.json` files are removed
 
 ## Getting Started
 
