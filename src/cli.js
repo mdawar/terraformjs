@@ -51,23 +51,6 @@ async function removeFiles(dir) {
 }
 
 /**
- * Executes Terraform with the passed arguments.
- *
- * @param {string[]} args - Array of arguments to pass to terraform
- */
-function executeTerraform(args) {
-  const terraform = child_process.spawn('terraform', args, {
-    // Pass through the corresponding stdio stream to the parent process
-    stdio: 'inherit'
-  });
-
-  terraform.on('close', code => {
-    // Exit with the same code
-    process.exit(code);
-  });
-}
-
-/**
  * Returns a string wrapped with ANSI escape sequences.
  *
  * @see {@link https://en.wikipedia.org/wiki/ANSI_escape_code#Colors}
@@ -84,11 +67,12 @@ function colorize(text, code) {
  *
  * @param {bool} generate - Generate the JSON files
  * @param {bool} execute - Execute Terraform
+ * @param {string[]} args - Array of command line arguments
  */
-async function run(generate = true, execute = true) {
-  if (generate) {
-    const cwd = process.cwd();
+async function run(generate = true, execute = true, args = []) {
+  const cwd = process.cwd();
 
+  if (generate) {
     try {
       const files = await removeFiles(cwd);
 
@@ -124,7 +108,24 @@ async function run(generate = true, execute = true) {
   }
 
   if (execute) {
-    executeTerraform(args);
+    // TODO: handle terraform being a symlink to terraformjs
+    const terraform = child_process.spawn('terraform', args, {
+      // Pass through the corresponding stdio stream to the parent process
+      stdio: 'inherit'
+    });
+
+    terraform.on('close', async code => {
+      try {
+        await removeFiles(cwd);
+      } catch (err) {
+        console.error(
+          `${colorize('Error removing generated files:', '31;1')} ${err}`
+        );
+      }
+
+      // Exit with the same code
+      process.exit(code);
+    });
   }
 }
 
@@ -167,4 +168,4 @@ if (versionArgs.includes(cmd)) {
   execute = false;
 }
 
-run(generate, execute);
+run(generate, execute, args);
