@@ -95,9 +95,13 @@ async function run(generate = true, execute = true, args = []) {
     try {
       const files = await generateFiles(cwd);
 
-      console.log(
-        `${colorize('Generated files:', '36;1')} ${files.join(', ')}`
-      );
+      if (files.length > 0) {
+        console.log(
+          `${colorize('Generated files:', '36;1')} ${files.join(', ')}`
+        );
+      } else {
+        console.log(`${colorize('No files were generated', '36;1')}`);
+      }
     } catch (err) {
       console.error(
         `${colorize('Error generating the JSON files:', '31;1')} ${err}`
