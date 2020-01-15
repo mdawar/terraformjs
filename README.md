@@ -36,7 +36,7 @@ When you use the `terraformjs` command instead of `terraform`:
 
 ## Getting Started
 
-1. Install TerraformJS globally:
+1. Install TerraformJS globally to be able to execute it from any directory:
 
 ```bash
 npm install -g terraformjs
@@ -48,7 +48,13 @@ npm install -g terraformjs
 npm init -y
 ```
 
-3. Open the `package.json` file and add a `type` field with the value of `module`:
+3. Install `terraformjs` to be able to import it in your modules:
+
+```bash
+npm install terraformjs
+```
+
+4. Open the `package.json` file and add a `type` field with the value of `module`:
 
 ```json
 {
@@ -58,11 +64,12 @@ npm init -y
 
 This is required for your `.js` files to be treated as ES modules by Node.js, because TerraformJS supports **ES modules** only and does not support CommonJS.
 
-4. Start writing your Terraform configuration files with JavaScript in `.tf.js` files instead of the standard `.tf` files:
+5. Start writing your Terraform configuration files with JavaScript in `.tf.js` files instead of the standard `.tf` files:
 
 For example:
 
 ```javascript
+// Terraform's top-level blocks are predefined and can be imported
 import { provider, data, resource, output } from 'terraformjs';
 
 // Configure the AWS provider
