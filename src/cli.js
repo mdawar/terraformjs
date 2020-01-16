@@ -112,7 +112,6 @@ async function run(generate = true, execute = true, args = []) {
   }
 
   if (execute) {
-    // TODO: handle terraform being a symlink to terraformjs
     const terraform = child_process.spawn('terraform', args, {
       // Pass through the corresponding stdio stream to the parent process
       stdio: 'inherit'
