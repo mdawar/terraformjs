@@ -4,7 +4,7 @@ TerraformJS is a wrapper for [Terraform](https://www.terraform.io/) that allows 
 
 ## Requirements
 
-- **Node.js** 13.2.0+ (With ES modules enabled by default)
+- **Node.js** (With ES modules support) (Tested on 13.2.0+)
 - **Terraform** 0.12+
 
 **Note**: This package was only tested on Linux, it should work just fine on macOS.
