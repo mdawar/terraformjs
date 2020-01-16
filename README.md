@@ -52,7 +52,7 @@ The configuration code is not checked for correctness, to validate your code use
 1. Install TerraformJS globally to be able to execute it from any directory:
 
 ```bash
-npm install -g terraformjs
+npm i -g @mdawar/terraformjs
 ```
 
 **Optional**: You can alias `terraform` to `terraformjs` by adding this line `alias terraform="terraformjs"` to `~/.bash_aliases` or `~/.bashrc`.
@@ -66,7 +66,7 @@ npm init -y
 3. Install `terraformjs` to be able to import it in your modules:
 
 ```bash
-npm install terraformjs
+npm i @mdawar/terraformjs
 ```
 
 4. Open the `package.json` file and add a `type` field with the value of `module`:
