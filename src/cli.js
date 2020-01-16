@@ -58,7 +58,7 @@ async function removeFiles(dir) {
  * @param {string} text - String to colorize
  * @param {string} code - ANSI code
  */
-function colorize(text, code) {
+function colorize(text, code = '31;1') {
   return `\x1b[${code}m${text}\x1b[0m`;
 }
 
@@ -77,16 +77,12 @@ async function run(generate = true, execute = true, args = []) {
       const files = await removeFiles(cwd);
 
       if (files.length > 0) {
-        console.log(
-          `${colorize('Removed files:', '31;1')} ${files.join(', ')}`
-        );
+        console.log(colorize('Removed files:'), files.join(', '));
       }
     } catch (err) {
       console.error(
-        `${colorize(
-          'Error removing the previously generated files:',
-          '31;1'
-        )} ${err}`
+        colorize('Error removing the previously generated files:'),
+        err.message
       );
 
       process.exit(1);
@@ -96,17 +92,12 @@ async function run(generate = true, execute = true, args = []) {
       const files = await generateFiles(cwd);
 
       if (files.length > 0) {
-        console.log(
-          `${colorize('Generated files:', '36;1')} ${files.join(', ')}`
-        );
+        console.log(colorize('Generated files:', '36;1'), files.join(', '));
       } else {
-        console.log(`${colorize('No files were generated', '36;1')}`);
+        console.log(colorize('No files were generated', '36;1'));
       }
     } catch (err) {
-      console.error(
-        `${colorize('Error generating the JSON files:', '31;1')} ${err}`
-      );
-
+      console.error(colorize('Error generating the JSON files:'), err.message);
       process.exit(1);
     }
   }
@@ -117,12 +108,22 @@ async function run(generate = true, execute = true, args = []) {
       stdio: 'inherit'
     });
 
+    terraform.on('error', err => {
+      console.log(colorize('Failed to execute terraform:'), err.message);
+      console.log(
+        colorize(
+          'Make sure Terraform is already installed and available in the $PATH'
+        )
+      );
+    });
+
     terraform.on('close', async code => {
       try {
         await removeFiles(cwd);
       } catch (err) {
         console.error(
-          `${colorize('Error removing generated files:', '31;1')} ${err}`
+          colorize('Error removing the generated files:'),
+          err.message
         );
       }
 
