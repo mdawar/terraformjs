@@ -7,9 +7,21 @@
   "scripts": {
     "test": "jest"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "terraform",
+    "terraformjs",
+    "Terraform JavaScript",
+    "Infrastructure as code"
+  ],
+  "author": "Pierre Mdawar",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mdawar/terraformjs.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mdawar/terraformjs/issues"
+  },
   "devDependencies": {
     "@babel/core": "^7.7.7",
     "@babel/preset-env": "^7.7.7",
