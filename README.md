@@ -7,6 +7,8 @@ TerraformJS is a wrapper for [Terraform](https://www.terraform.io/) that allows 
 - **Node.js** 13.2.0+ (With ES modules enabled by default)
 - **Terraform** 0.12+
 
+**Note**: This package was only tested on Linux, it should work just fine on macOS.
+
 ## Overview
 
 You can write your Terraform configuration using JavaScript modules named with a `.tf.js` suffix, TerraformJS imports these modules and generates Terraform [JSON configuration](https://www.terraform.io/docs/configuration/syntax-json.html) files named with a `.tf.json` suffix.
@@ -18,6 +20,8 @@ Terraform loads these `.tf.json` files along with your `.tf` files, so you can u
 - Write your infrastructure configuration files in a language you already know
 - Use programming features that are not available in Terraform's language syntax (HCL)
 - Import your configuration data from databases, files or any other source
+
+This project was inspired by [pretf](https://github.com/raymondbutcher/pretf), a similar tool but for Python.
 
 ## Features
 
@@ -34,6 +38,15 @@ When you use the `terraformjs` command instead of `terraform`:
 3. Terraform is executed with any passed command line arguments
 4. After Terraform's execution is complete all the generated `.tf.json` files are removed
 
+All the command line arguments that you pass to `terraformjs` will be passed to `terraform`, with the exception of one command specific to `terraformjs` used to generate the JSON files without executing `terraform`:
+
+```bash
+# Generate the JSON files (*.tf.json) without executing Terraform
+terraformjs generate
+```
+
+The configuration code is not checked for correctness, to validate your code use `terraformjs validate`.
+
 ## Getting Started
 
 1. Install TerraformJS globally to be able to execute it from any directory:
@@ -42,7 +55,7 @@ When you use the `terraformjs` command instead of `terraform`:
 npm install -g terraformjs
 ```
 
-Optional: You can alias `terraform` to `terraformjs` by adding this line `alias terraform="terraformjs"` to `~/.bash_aliases` or `~/.bashrc`.
+**Optional**: You can alias `terraform` to `terraformjs` by adding this line `alias terraform="terraformjs"` to `~/.bash_aliases` or `~/.bashrc`.
 
 2. In a new directory or in your current Terraform project's directory, create a `package.json` file:
 
@@ -70,7 +83,8 @@ This is required for your `.js` files to be treated as ES modules by Node.js, be
 
 ## Write your infrastructure configuration in JavaScript
 
-All the top-level Terraform blocks are defined and can imported from `terraformjs` package:
+All the top-level Terraform blocks are defined and can imported from the `terraformjs` package:
+
 - `terraform`
 - `provider`
 - `resource`
@@ -81,7 +95,7 @@ All the top-level Terraform blocks are defined and can imported from `terraformj
 - `output`
 
 ```javascript
-// import the needed top-level blocks
+// Import the needed top-level blocks
 import { provider, resource, variable, data, output } from 'terraformjs';
 ```
 
@@ -89,31 +103,55 @@ To define the block labels, you can chain as many properties as needed:
 
 ```javascript
 // Chain an "aws" property to define the provider label
-provider.aws
+provider.aws;
 
 // You can chain any number of properties as they are dynamically handled
-resource.aws_instance.web
-data.aws_ami.debian
+resource.aws_instance.web;
+data.aws_ami.debian;
+
+// If the label is dynamic you can use the square brackets []
+output[`dynamic-value-${n}`];
 ```
 
 To define the block body you can call the last chained property with an object:
 
 ```javascript
-import { provider, data, resource, output } from 'terraformjs';
+import {
+  terraform,
+  provider,
+  variable,
+  data,
+  resource,
+  output
+} from 'terraformjs';
 
 // You must export the defined blocks so terraformjs can import them and generate the JSON file
-// The export names do not matter, they can be used in other defined blocks to reference another block
-export const aws = provider.aws({
+// The export names do not matter, they can be used as values in the body of other blocks
+
+// The terraform top-level block does not have any labels so it can be called directly to define the body
+export const tf = terraform({
   // Define any supported arguments
-  region: 'us-east-1'
+  required_version: '>= 0.12',
+
+  // When a nested block requires a label
+  // The label can be nested in an object
+  backend: {
+    // Defines the "backend s3 {}" block
+    s3: {
+      profile: 'default',
+      bucket: 'BUCKET_NAME',
+      region: 'us-east-1'
+    }
+  }
 });
 
 // To define a block with an empty body you must call the last property
-export const aws = provider.aws() // An empty object is the default
+// Set the variable value in *.tfvars file
+// or using -var="aws_instance_type=..." CLI option
+export const instance_type = variable.aws_instance_type(); // An empty object {} is the default body
 
-export const awsWest = provider.aws({
-  alias: 'west',
-  region: 'us-east-1',
+export const aws = provider.aws({
+  region: 'us-west-1',
   profile: 'default'
 });
 
@@ -140,14 +178,15 @@ export const ubuntu = data.aws_ami.ubuntu({
 // Define a resource
 export const instance = resource.aws_instance.web({
   // Example of referencing another defined block
-  // This will be translated to "aws.west"
-  provider: awsWest,
+  provider: aws,
 
   // We can use the data source that we have defined earlier
   // Results in ${data.aws_ami.ubuntu.id}
   ami: ubuntu.id,
 
-  instance_type = 't2.micro',
+  // Use the value of the variable defined above
+  // Results in ${var.aws_instance_type}
+  instance_type,
 
   tags: {
     Name: 'web'
@@ -155,7 +194,7 @@ export const instance = resource.aws_instance.web({
 
   // When the nested block type requires one or more labels
   // an array of objects can be used
-  provisoner: [
+  provisioner: [
     {
       // provisioner "local-exec" {}
       'local-exec': {
@@ -181,8 +220,9 @@ export const publicIP = output.instance_ip_address({
 Another example exporting multiple blocks using arrays:
 
 ```javascript
-import { provider, data, resource, output } from 'terraformjs';
+import { provider, variable, resource, output } from 'terraformjs';
 
+// Define a variable
 // Set the variable value in *.tfvars file
 // or using -var="do_token=..." CLI option
 export const token = variable.do_token();
@@ -191,7 +231,8 @@ export const token = variable.do_token();
 export const doProvider = provider.digitalocean({
   // Translates to ${var.do_token}
   // Same as token: token
-  token
+  token,
+  version: '~> 1.9'
 });
 
 // List of droplets
@@ -212,6 +253,7 @@ for (const n of [1, 2, 3, 4]) {
 
   droplets.push(droplet);
 
+  // Define an output block with a dynamic label using square brakctes []
   const ip = output[`web-${n}`]({
     value: droplet.ipv4_address
   });
@@ -229,8 +271,9 @@ const droplets = [];
 const ipAddresses = [];
 
 export const all = [
-  // Nested arrays
+  // Nested array
   droplets,
-  ipAddresses
+  // You can nest arrays of any levels deep
+  [ipAddresses]
 ];
 ```
