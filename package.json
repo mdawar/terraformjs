@@ -1,6 +1,6 @@
 {
   "name": "@mdawar/terraformjs",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "description": "Infrastructure as code using JavaScript and Terraform",
   "main": "src/index.js",
