@@ -1,5 +1,4 @@
 import { promises as fs } from 'fs';
-import { Block } from './base.js';
 
 /**
  * Global Terraform block symbols.
@@ -66,7 +65,7 @@ export function generateJSON(path, blocks) {
       value.forEach(innerVal => {
         processBlocks(innerVal);
       });
-    } else if (value instanceof Block) {
+    } else if (value[TYPE]) {
       objects.push(createBlockObject(value));
     }
   })(blocks);
