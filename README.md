@@ -96,7 +96,13 @@ All the top-level Terraform blocks are defined and can imported from the `terraf
 
 ```javascript
 // Import the needed top-level blocks
-import { provider, resource, variable, data, output } from 'terraformjs';
+import {
+  provider,
+  resource,
+  variable,
+  data,
+  output
+} from '@mdawar/terraformjs';
 ```
 
 To define the block labels, you can chain as many properties as needed:
@@ -123,7 +129,7 @@ import {
   data,
   resource,
   output
-} from 'terraformjs';
+} from '@mdawar/terraformjs';
 
 // You must export the defined blocks so terraformjs can import them and generate the JSON file
 // The export names do not matter, they can be used as values in the body of other blocks
@@ -220,7 +226,7 @@ export const publicIP = output.instance_ip_address({
 Another example exporting multiple blocks using arrays:
 
 ```javascript
-import { provider, variable, resource, output } from 'terraformjs';
+import { provider, variable, resource, output } from '@mdawar/terraformjs';
 
 // Define a variable
 // Set the variable value in *.tfvars file
