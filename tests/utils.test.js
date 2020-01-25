@@ -17,6 +17,8 @@ beforeEach(() => {
 
 describe('getFiles function', () => {
   test('Getting the all files in a directory', async () => {
+    expect.assertions(1);
+
     fs.promises.readdir.mockResolvedValue([
       { name: 'providers.tf.js', isFile: () => true },
       { name: 'variables.tf.js', isFile: () => true },
@@ -41,6 +43,8 @@ describe('getFiles function', () => {
   });
 
   test('Getting all the files from an empty directory', async () => {
+    expect.assertions(1);
+
     fs.promises.readdir.mockResolvedValue([]);
 
     const files = await getFiles('/path/to/dir');
@@ -49,6 +53,8 @@ describe('getFiles function', () => {
   });
 
   test('Getting the files that match an extension in a directory', async () => {
+    expect.assertions(1);
+
     // fs.readdir with withFileTypes: true option returns fs.Dirent objects
     fs.promises.readdir.mockResolvedValue([
       { name: 'providers.tf.js', isFile: () => true },
@@ -71,6 +77,8 @@ describe('getFiles function', () => {
   });
 
   test('Getting the files that match an extension from an empty directory', async () => {
+    expect.assertions(1);
+
     fs.promises.readdir.mockResolvedValue([]);
 
     const files = await getFiles('/path/to/dir', '.tf.js');
@@ -91,18 +99,24 @@ describe('getFiles function', () => {
 
 describe('createBlockObject function', () => {
   test('Creating an object from an empty Block instance', async () => {
+    expect.assertions(1);
+
     const block = new Block();
 
     expect(await createBlockObject(block)).toEqual({});
   });
 
   test('Creating an object from a Block instance with a type only', async () => {
+    expect.assertions(1);
+
     const block = new Block('resource');
 
     expect(await createBlockObject(block)).toEqual({ resource: {} });
   });
 
   test('Creating an object from a Block instance with a type and labels', async () => {
+    expect.assertions(1);
+
     const block = new Block('resource', ['aws_instance', 'web']);
 
     expect(await createBlockObject(block)).toEqual({
@@ -115,6 +129,8 @@ describe('createBlockObject function', () => {
   });
 
   test('Creating an object from a Block instance with a type, labels and body', async () => {
+    expect.assertions(1);
+
     const block = new Block('resource', ['aws_instance', 'web'], {
       instance_type: 't2.micro'
     });
@@ -131,6 +147,8 @@ describe('createBlockObject function', () => {
   });
 
   test('Creating an object from a Block instance without labels', async () => {
+    expect.assertions(1);
+
     const block = new Block('terraform', [], {
       required_version: {
         aws: '~> 2.0'
@@ -145,10 +163,105 @@ describe('createBlockObject function', () => {
       }
     });
   });
+
+  test('Creating an object from a function Block body', async () => {
+    expect.assertions(1);
+
+    const block = new Block('resource', ['aws_instance', 'web'], function() {
+      return {
+        instance_type: 't2.micro'
+      };
+    });
+
+    expect(await createBlockObject(block)).toEqual({
+      resource: {
+        aws_instance: {
+          web: {
+            instance_type: 't2.micro'
+          }
+        }
+      }
+    });
+  });
+
+  test('Creating an object from a function Block body returning a promise that resolves', async () => {
+    expect.assertions(1);
+
+    const block = new Block('resource', ['aws_instance', 'web'], function() {
+      return Promise.resolve({
+        instance_type: 't2.micro'
+      });
+    });
+
+    expect(await createBlockObject(block)).toEqual({
+      resource: {
+        aws_instance: {
+          web: {
+            instance_type: 't2.micro'
+          }
+        }
+      }
+    });
+  });
+
+  test('Creating an object from a function Block body returning a promise that rejects', async () => {
+    expect.assertions(1);
+
+    const block = new Block('resource', ['aws_instance', 'web'], function() {
+      return Promise.reject(new Error('Failure'));
+    });
+
+    return await expect(createBlockObject(block)).rejects.toThrow('Failure');
+  });
+
+  test('Creating an object from an async function Block body', async () => {
+    expect.assertions(1);
+
+    const block = new Block(
+      'resource',
+      ['aws_instance', 'web'],
+      async function() {
+        return {
+          instance_type: 't2.micro'
+        };
+      }
+    );
+
+    expect(await createBlockObject(block)).toEqual({
+      resource: {
+        aws_instance: {
+          web: {
+            instance_type: 't2.micro'
+          }
+        }
+      }
+    });
+  });
+
+  test('Creating an object from an async function Block body that throws an error', async () => {
+    expect.assertions(2);
+
+    const block = new Block(
+      'resource',
+      ['aws_instance', 'web'],
+      async function() {
+        throw new Error('Failure');
+      }
+    );
+
+    try {
+      await createBlockObject(block);
+    } catch (err) {
+      expect(err).toBeInstanceOf(Error);
+      expect(err.message).toEqual('Failure');
+    }
+  });
 });
 
 describe('generateJSON function', () => {
   test('Generating a JSON file from an empty array', async () => {
+    expect.assertions(1);
+
     fs.promises.writeFile.mockResolvedValue();
 
     await generateJSON('/path/to/file.json', []);
@@ -161,6 +274,8 @@ describe('generateJSON function', () => {
   });
 
   test('Generating a JSON file from an array of non Block instances', async () => {
+    expect.assertions(1);
+
     fs.promises.writeFile.mockResolvedValue();
 
     // All the values that are not instances of Block are ignored
@@ -174,6 +289,8 @@ describe('generateJSON function', () => {
   });
 
   test('Generating a JSON file from an array of Block instances', async () => {
+    expect.assertions(1);
+
     fs.promises.writeFile.mockResolvedValue();
 
     const blocks = [
@@ -222,6 +339,8 @@ describe('generateJSON function', () => {
   });
 
   test('Generating a JSON file from nested arrays of Block instances', async () => {
+    expect.assertions(1);
+
     fs.promises.writeFile.mockResolvedValue();
 
     const blocks = [
