@@ -119,7 +119,7 @@ data.aws_ami.debian;
 output[`dynamic-value-${n}`];
 ```
 
-To define the block body you can call the last chained property with an object:
+To define the block body you can call the last chained property with an **object** or a **function** that returns an object:
 
 ```javascript
 import {
@@ -282,4 +282,74 @@ export const all = [
   // You can nest arrays of any levels deep
   [ipAddresses]
 ];
+```
+
+Example of using an `async` function as the block body:
+
+```javascript
+// In this example we configure an **S3** bucket to respond to requests coming from CloudFlare proxy IP addresses only
+// This is used when hosting a static website using CloudFlare and AWS S3
+import axios from 'axios';
+import { provider, resource } from '@mdawar/terraformjs';
+
+export const aws = provider.aws({
+  version: '~> 2.45',
+  profile: 'default',
+  region: 'us-east-1'
+});
+
+// Static site name, to be used as the S3 bucket name
+const siteName = 'example.com';
+
+// Using an async function as the block body instead of an object
+// A function that returns a Promise that resolves to an object can be used instead
+export const bucket = resource.aws_s3_bucket.website(async () => {
+  // Get the Cloudflare proxy IP addresses
+  // See: https://www.cloudflare.com/ips/
+  let [ipv4, ipv6] = await Promise.all([
+    axios.get('https://www.cloudflare.com/ips-v4'),
+    axios.get('https://www.cloudflare.com/ips-v6')
+  ]);
+
+  ipv4 = ipv4.data.trim().split('\n');
+  ipv6 = ipv6.data.trim().split('\n');
+
+  const ips = [...ipv4, ...ipv6];
+
+  // Returning an object to be used as the block body
+  return {
+    bucket: siteName,
+    region: 'us-east-1',
+    acl: 'public-read',
+
+    website: {
+      index_document: 'index.html',
+      error_document: '404.html'
+    },
+
+    // We want to configure the bucket policy to allow Cloudflare proxy IP addresses only
+    policy: `{
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Sid": "PublicReadGetObject",
+                "Effect": "Allow",
+                "Principal": "*",
+                "Action": "s3:GetObject",
+                "Resource": "arn:aws:s3:::${siteName}/*",
+                "Condition": {
+                  "IpAddress": {
+                      "aws:SourceIp": ${JSON.stringify(ips)}
+                  }
+                }
+            }
+        ]
+    }`,
+
+    tags: {
+      Name: siteName,
+      Environment: 'Production'
+    }
+  };
+});
 ```
