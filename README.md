@@ -83,7 +83,9 @@ This is required for your `.js` files to be treated as ES modules by Node.js, be
 
 ## Write your infrastructure configuration in JavaScript
 
-All the top-level Terraform blocks are defined and can imported from the `terraformjs` package:
+### Top-level Terraform blocks
+
+All the top-level Terraform blocks are predefined and can imported from the `terraformjs` package:
 
 - `terraform`
 - `provider`
@@ -105,6 +107,8 @@ import {
 } from '@mdawar/terraformjs';
 ```
 
+### Define the block labels
+
 To define the block labels, you can chain as many properties as needed:
 
 ```javascript
@@ -118,6 +122,8 @@ data.aws_ami.debian;
 // If the label is dynamic you can use the square brackets []
 output[`dynamic-value-${n}`];
 ```
+
+### Define the block body
 
 To define the block body you can call the last chained property with an **object** or a **function** that returns an object:
 
@@ -223,7 +229,9 @@ export const publicIP = output.instance_ip_address({
 });
 ```
 
-Another example exporting multiple blocks using arrays:
+### Exporting multiple blocks using an `Array`
+
+Multiple blocks may be exported using arrays:
 
 ```javascript
 import { provider, variable, resource, output } from '@mdawar/terraformjs';
@@ -283,6 +291,8 @@ export const all = [
   [ipAddresses]
 ];
 ```
+
+### Using a function as the block body
 
 Example of using an `async` function as the block body:
 
