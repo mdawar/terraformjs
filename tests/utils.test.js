@@ -90,22 +90,22 @@ describe('getFiles function', () => {
 });
 
 describe('createBlockObject function', () => {
-  test('Creating an object from an empty Block instance', () => {
+  test('Creating an object from an empty Block instance', async () => {
     const block = new Block();
 
-    expect(createBlockObject(block)).toEqual({});
+    expect(await createBlockObject(block)).toEqual({});
   });
 
-  test('Creating an object from a Block instance with a type only', () => {
+  test('Creating an object from a Block instance with a type only', async () => {
     const block = new Block('resource');
 
-    expect(createBlockObject(block)).toEqual({ resource: {} });
+    expect(await createBlockObject(block)).toEqual({ resource: {} });
   });
 
-  test('Creating an object from a Block instance with a type and labels', () => {
+  test('Creating an object from a Block instance with a type and labels', async () => {
     const block = new Block('resource', ['aws_instance', 'web']);
 
-    expect(createBlockObject(block)).toEqual({
+    expect(await createBlockObject(block)).toEqual({
       resource: {
         aws_instance: {
           web: {}
@@ -114,12 +114,12 @@ describe('createBlockObject function', () => {
     });
   });
 
-  test('Creating an object from a Block instance with a type, labels and body', () => {
+  test('Creating an object from a Block instance with a type, labels and body', async () => {
     const block = new Block('resource', ['aws_instance', 'web'], {
       instance_type: 't2.micro'
     });
 
-    expect(createBlockObject(block)).toEqual({
+    expect(await createBlockObject(block)).toEqual({
       resource: {
         aws_instance: {
           web: {
@@ -130,14 +130,14 @@ describe('createBlockObject function', () => {
     });
   });
 
-  test('Creating an object from a Block instance without labels', () => {
+  test('Creating an object from a Block instance without labels', async () => {
     const block = new Block('terraform', [], {
       required_version: {
         aws: '~> 2.0'
       }
     });
 
-    expect(createBlockObject(block)).toEqual({
+    expect(await createBlockObject(block)).toEqual({
       terraform: {
         required_version: {
           aws: '~> 2.0'

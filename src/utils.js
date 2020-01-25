@@ -31,15 +31,23 @@ export async function getFiles(dir, ext = '') {
  * Creates an object from a Block instance.
  *
  * @param {Block} block - Block instance
+ * @returns {object} Object representation of the block
  */
-export function createBlockObject(block) {
+export async function createBlockObject(block) {
+  let body = block[BODY];
+
+  // The body might be a function
+  if (typeof body === 'function') {
+    body = await body();
+  }
+
   // Create a nested object from the block labels
   const blockObject = block[LABELS].reduceRight(
     (value, key) => {
       return { [key]: value };
     },
     // Start with the block body as the initial value
-    block[BODY]
+    body
   );
 
   return block[TYPE]
@@ -56,17 +64,17 @@ export function createBlockObject(block) {
  * @param {object[]} blocks - Array of Block instances
  * @returns {Promise}
  */
-export function generateJSON(path, blocks) {
+export async function generateJSON(path, blocks) {
   const objects = [];
 
-  (function processBlocks(value) {
+  await (async function processBlocks(value) {
     // Handle nested arrays
     if (Array.isArray(value)) {
-      value.forEach(innerVal => {
-        processBlocks(innerVal);
-      });
+      for (const innerVal of value) {
+        await processBlocks(innerVal);
+      }
     } else if (value[TYPE]) {
-      objects.push(createBlockObject(value));
+      objects.push(await createBlockObject(value));
     }
   })(blocks);
 

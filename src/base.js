@@ -74,7 +74,7 @@ export class Block {
    *
    * @param {string} type - Block type (resource, variable, provider, data...)
    * @param {string[]} labels - Block labels
-   * @param {Object} body - Block body
+   * @param {(Object|function)} body - Block body object or a function that returns an object
    * @returns {Proxy} Proxy object that handles dynamic property access
    */
   constructor(type, labels = [], body = {}) {
