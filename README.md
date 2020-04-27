@@ -1,5 +1,7 @@
 # TerraformJS
 
+[![npm](https://img.shields.io/npm/v/@mdawar/terraformjs)](https://www.npmjs.com/package/@mdawar/terraformjs)
+
 TerraformJS is a wrapper for [Terraform](https://www.terraform.io/) that allows you to write your infrastructure configurations in JavaScript.
 
 ## Requirements
