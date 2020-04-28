@@ -26,8 +26,8 @@
     "src/*"
   ],
   "devDependencies": {
-    "@babel/core": "^7.7.7",
-    "@babel/preset-env": "^7.7.7",
+    "@babel/core": "^7.9.0",
+    "@babel/preset-env": "^7.9.5",
     "babel-jest": "^24.9.0",
     "jest": "^24.9.0"
   },
