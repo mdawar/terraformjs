@@ -32,7 +32,7 @@
     "jest": "^24.9.0"
   },
   "bin": {
-    "terraformjs": "./src/cli.js"
+    "terraformjs": "src/cli.js"
   },
   "prettier": {
     "semi": true,
