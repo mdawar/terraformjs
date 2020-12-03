@@ -90,16 +90,33 @@ export class Block {
           return target[property];
         }
 
-        return target.getExpression(property.toString());
+        return target.getInterpolation(property.toString());
       }
     });
+  }
+
+  /**
+   * Returns the Terraform interpolation of the Block instance.
+   *
+   * @param {string} prop - Dynamic property accessed on the Block instance
+   * @returns {(string|Interpolation)} Expression string for provider blocks or an Interpolation object
+   */
+  getInterpolation(prop) {
+    const expression = this.getExpression(prop);
+
+    // Provider interpolation expressions are not wrapped in ${}
+    if (this[TYPE] === 'provider') {
+      return expression;
+    }
+
+    return new Interpolation(expression);
   }
 
   /**
    * Returns the Terraform reference expression of the Block instance.
    *
    * @param {string} prop - Dynamic property accessed on the Block instance
-   * @returns {(string|Interpolation)} Expression string for provider blocks or an Interpolation object
+   * @returns {string} Expression string
    */
   getExpression(prop) {
     const parts = [];
@@ -132,22 +149,15 @@ export class Block {
         // Return the <PROVIDER>.default if the alias is requested
         parts.push('default');
       }
+    } else if (prop) {
+      parts.push(prop);
     }
 
-    // Provider reference expressions are not wrapped in ${}
-    if (this[TYPE] === 'provider') {
-      return parts.join('.');
-    } else {
-      if (prop) {
-        parts.push(prop);
-      }
-
-      return new Interpolation(parts.join('.'));
-    }
+    return parts.join('.');
   }
 
   toString() {
-    return String(this.getExpression());
+    return String(this.getInterpolation());
   }
 
   // Called by JSON.stringify

@@ -149,13 +149,19 @@ describe('Block class', () => {
 
     expect(JSON.stringify(block)).toBe('"${aws_instance.web}"');
   });
+
+  test('Getting the expression of the Block instance', () => {
+    const variable = new Block('variable', ['api_key']);
+
+    expect(variable.getExpression()).toEqual('var.api_key');
+  });
 });
 
 describe('CallableObject class', () => {
   test('Creating a CallableObject instance', () => {
     const callable = new CallableObject();
 
-    const mockFn = jest.fn(x => x + 1);
+    const mockFn = jest.fn((x) => x + 1);
 
     callable.__call__ = mockFn;
 
